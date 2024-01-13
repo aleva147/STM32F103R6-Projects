@@ -15,6 +15,10 @@
 #include "driver_windvane.h"
 
 
+int prevTemperature = 0;
+int prevWindvane = 0;
+int prevAnemometer = 0;
+
 
 void writeToLCD(uint32_t addr, const char* str) {
 	LCD_CommandEnqueue(LCD_INSTRUCTION, LCD_SET_DD_RAM_ADDRESS_INSTRUCTION | addr);
@@ -30,14 +34,26 @@ static void homeworkTask(void *parameters)
 	writeToLCD(0x40, "WindSpd: ");
 	writeToLCD(0x10, "Temp(C): ");
 	while(1) {
-		char temperature[4];
-		char windvane[4];
-		sprintf(temperature, "%d", temperatureSensor);
-		sprintf(windvane, "%d", windvaneSensor);
-		writeToLCD(0x18, "   ");	// Erase old value (necessary when decreasing the temperature from double digits to a single digit)
-		writeToLCD(0x18, temperature);
-		writeToLCD(0x08, "   ");
-		writeToLCD(0x08, windvane);
+		if (temperatureSensor != prevTemperature
+				|| windvaneSensor != prevWindvane
+				|| anemometerSensor != prevAnemometer) {
+			prevTemperature = temperatureSensor;
+			prevWindvane = windvaneSensor;
+			prevAnemometer = anemometerSensor;
+
+			char temperature[4];
+			char windvane[4];
+			char anemometer[4];
+			sprintf(temperature, "%d", temperatureSensor);
+			sprintf(windvane, "%d", windvaneSensor);
+			sprintf(anemometer, "%d", anemometerSensor);
+			writeToLCD(0x18, "       ");	// Erase old value (necessary when decreasing the temperature from double digits to a single digit)
+			writeToLCD(0x18, temperature);
+			writeToLCD(0x08, "       ");
+			writeToLCD(0x08, windvane);
+			writeToLCD(0x48, "       ");
+			writeToLCD(0x48, anemometer);
+		}
 
 		vTaskDelay(pdMS_TO_TICKS(200));
 	}
@@ -48,6 +64,7 @@ void homeworkInit()
 	LCD_Init();
 	Thermometer_Init();
 	Windvane_Init();
+	Anemometer_Init();
 	xTaskCreate(homeworkTask, "Homework_Task", 128, NULL, 2, NULL);
 }
 
