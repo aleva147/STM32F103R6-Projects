@@ -3,6 +3,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "adc.h"
+#include "gpio.h"
+#include "timers.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -19,11 +21,22 @@ int prevTemperature = 0;
 int prevWindvane = 0;
 int prevAnemometer = 0;
 
+TimerHandle_t LED_Handle;
+
 
 void writeToLCD(uint32_t addr, const char* str) {
 	LCD_CommandEnqueue(LCD_INSTRUCTION, LCD_SET_DD_RAM_ADDRESS_INSTRUCTION | addr);
 	for (size_t i = 0; i < strlen(str); i++) {
 		LCD_CommandEnqueue(LCD_DATA, str[i]);
+	}
+}
+
+void LED_Callback() {
+	if (anemometerSensor < 50) {
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_13, GPIO_PIN_RESET);
+	}
+	else {
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_13);
 	}
 }
 
@@ -66,5 +79,7 @@ void homeworkInit()
 	Windvane_Init();
 	Anemometer_Init();
 	xTaskCreate(homeworkTask, "Homework_Task", 128, NULL, 2, NULL);
+	LED_Handle = xTimerCreate("LED_Timer", pdMS_TO_TICKS(500), pdTRUE, NULL, LED_Callback);
+	xTimerStart(LED_Handle, portMAX_DELAY);
 }
 
