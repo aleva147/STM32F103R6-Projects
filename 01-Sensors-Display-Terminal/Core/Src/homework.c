@@ -31,6 +31,12 @@ void writeToLCD(uint32_t addr, const char* str) {
 	}
 }
 
+void writeToUART(char* str) {
+	for (size_t i = 0; i < strlen(str); i++) {
+		UART_AsyncTransmitCharacter(str[i]);
+	}
+}
+
 void LED_Callback() {
 	if (anemometerSensor < 50) {
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_13, GPIO_PIN_RESET);
@@ -60,12 +66,19 @@ static void homeworkTask(void *parameters)
 			sprintf(temperature, "%d", temperatureSensor);
 			sprintf(windvane, "%d", windvaneSensor);
 			sprintf(anemometer, "%d", anemometerSensor);
-			writeToLCD(0x18, "       ");	// Erase old value (necessary when decreasing the temperature from double digits to a single digit)
-			writeToLCD(0x18, temperature);
-			writeToLCD(0x08, "       ");
-			writeToLCD(0x08, windvane);
-			writeToLCD(0x48, "       ");
-			writeToLCD(0x48, anemometer);
+			writeToLCD(0x19, "      ");	// Erase old value (necessary when decreasing the temperature from double digits to a single digit)
+			writeToLCD(0x19, temperature);
+			writeToLCD(0x09, "      ");
+			writeToLCD(0x09, windvane);
+			writeToLCD(0x49, "      ");
+			writeToLCD(0x49, anemometer);
+
+			writeToUART("\b\b\b\b\b\b\b\b\b\b\b");
+			writeToUART(windvane);
+			writeToUART("/");
+			writeToUART(anemometer);
+			writeToUART("/");
+			writeToUART(temperature);
 		}
 
 		vTaskDelay(pdMS_TO_TICKS(200));
@@ -75,6 +88,7 @@ static void homeworkTask(void *parameters)
 void homeworkInit()
 {
 	LCD_Init();
+	UART_Init();
 	Thermometer_Init();
 	Windvane_Init();
 	Anemometer_Init();
