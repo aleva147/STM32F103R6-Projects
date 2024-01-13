@@ -67,7 +67,7 @@ static void LCD_Task(void *parameter)
 void LCD_Init()
 {
 	LCD_QueueHandle = xQueueCreate(64, sizeof(LCD_Command));
-	xTaskCreate(LCD_Task, "LCD_Task", 64, NULL, 2, &LCD_TaskHandle);
+	xTaskCreate(LCD_Task, "LCD_Task", 64, NULL, 5, &LCD_TaskHandle);
 }
 
 void LCD_CommandEnqueue(LCD_CommandReg reg, LCD_CommandVal val)
