@@ -1,10 +1,3 @@
-/*
- * driver_lcd.c
- *
- *  Created on: Jan 6, 2022
- *      Author: Marko Micovic
- */
-
 #include "driver_lcd.h"
 
 #include "FreeRTOS.h"

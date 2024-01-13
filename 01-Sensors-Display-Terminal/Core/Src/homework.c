@@ -1,10 +1,3 @@
-/*
- * homework.c
- *
- *  Created on: Jan 6, 2022
- *      Author: Marko Micovic
- */
-
 #include "homework.h"
 
 #include "FreeRTOS.h"
@@ -15,8 +8,9 @@
 
 #include "driver_lcd.h"
 #include "driver_uart.h"
-#include "driver_motor.h"
-#include "driver_temp.h"
+#include "driver_thermometer.h"
+#include "driver_anemometer.h"
+#include "driver_windvanemeter.h"
 
 static void homeworkTask(void *parameters)
 {

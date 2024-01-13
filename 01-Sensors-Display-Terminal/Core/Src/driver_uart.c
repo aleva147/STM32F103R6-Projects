@@ -1,10 +1,3 @@
-/*
- * driver_uart.c
- *
- *  Created on: Jan 6, 2022
- *      Author: Marko Micovic
- */
-
 #include "driver_uart.h"
 
 #include "FreeRTOS.h"
