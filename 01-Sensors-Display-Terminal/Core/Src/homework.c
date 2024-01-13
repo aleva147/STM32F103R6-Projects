@@ -2,9 +2,11 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "adc.h"
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "driver_lcd.h"
 #include "driver_uart.h"
@@ -21,12 +23,18 @@ void writeToLCD(uint32_t addr, const char* str) {
 	}
 }
 
+
 static void homeworkTask(void *parameters)
 {
 	writeToLCD(0x00, "WindDir: ");
 	writeToLCD(0x40, "WindSpd: ");
 	writeToLCD(0x10, "Temp(C): ");
 	while(1) {
+		char temperature[4];
+		sprintf(temperature, "%d", temperatureSensor);
+		writeToLCD(0x18, "   ");	// Erase old value (necessary when decreasing the temperature from double digits to a single digit)
+		writeToLCD(0x18, temperature);
+
 		vTaskDelay(pdMS_TO_TICKS(200));
 	}
 }
@@ -34,6 +42,7 @@ static void homeworkTask(void *parameters)
 void homeworkInit()
 {
 	LCD_Init();
+	Thermometer_Init();
 	xTaskCreate(homeworkTask, "Homework_Task", 128, NULL, 2, NULL);
 }
 

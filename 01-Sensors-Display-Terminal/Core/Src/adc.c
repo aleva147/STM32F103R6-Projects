@@ -21,7 +21,14 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "driver_thermometer.h"
 
+#define MAX_VOLTAGE 5.0
+#define RESOLUTION 4096.0
+
+extern TaskHandle_t thermometer_TaskHandle;
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc1;
@@ -121,7 +128,14 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
+	if (hadc->Instance != hadc1.Instance) {
+		return;
+	}
+	uint32_t value = HAL_ADC_GetValue(&hadc1);
+	temperatureSensor = ((float) value) * MAX_VOLTAGE * 100 / RESOLUTION;
+	xTaskNotifyGive(thermometer_TaskHandle);
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
