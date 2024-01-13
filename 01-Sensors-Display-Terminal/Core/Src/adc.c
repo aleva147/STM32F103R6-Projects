@@ -23,12 +23,17 @@
 /* USER CODE BEGIN 0 */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "semphr.h"
 #include "driver_thermometer.h"
+#include "driver_windvane.h"
 
 #define MAX_VOLTAGE 5.0
 #define RESOLUTION 4096.0
 
+SemaphoreHandle_t mx_MutexHandle;
+int mxSelect = 0;
 extern TaskHandle_t thermometer_TaskHandle;
+extern TaskHandle_t windvane_TaskHandle;
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc1;
@@ -38,7 +43,7 @@ void MX_ADC1_Init(void)
 {
 
   /* USER CODE BEGIN ADC1_Init 0 */
-
+  mx_MutexHandle = xSemaphoreCreateMutex();
   /* USER CODE END ADC1_Init 0 */
 
   ADC_ChannelConfTypeDef sConfig = {0};
@@ -128,13 +133,38 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 }
 
 /* USER CODE BEGIN 1 */
+static float voltageThresholds[16] =
+{ 0.52635, 0.8136, 1.0611, 1.36555, 1.74565, 1.9979, 2.4099, 2.88215, 3.3071,
+		3.7009, 3.95155, 4.24015, 4.4637, 4.56805, 4.6344, 5 };
+static float windBearings[16] =
+{ 270, 315, 292.5, 0, 337.5, 225, 247.5, 45, 22.5, 180, 202.5, 135, 157.5, 90,
+		67.5, 112.5 };
+static float voltage2WindBearing(float voltage)
+{
+	for (uint32_t i = 0; i < 15; i++)
+	{
+		if (voltage < voltageThresholds[i])
+		{
+			return windBearings[i];
+		}
+	}
+	return windBearings[15];
+}
+
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 	if (hadc->Instance != hadc1.Instance) {
 		return;
 	}
 	uint32_t value = HAL_ADC_GetValue(&hadc1);
-	temperatureSensor = ((float) value) * MAX_VOLTAGE * 100 / RESOLUTION;
-	xTaskNotifyGive(thermometer_TaskHandle);
+	if (mxSelect == 0) {
+		temperatureSensor = ((float) value) * MAX_VOLTAGE * 100 / RESOLUTION;
+		xTaskNotifyGive(thermometer_TaskHandle);
+	}
+	else {
+		windvaneSensor = voltage2WindBearing(((float) value) * MAX_VOLTAGE / RESOLUTION);
+		xTaskNotifyGive(windvane_TaskHandle);
+	}
 }
 /* USER CODE END 1 */
 
