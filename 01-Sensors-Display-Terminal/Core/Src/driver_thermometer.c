@@ -10,6 +10,7 @@ extern SemaphoreHandle_t mx_MutexHandle;
 TaskHandle_t thermometer_TaskHandle;
 
 int temperatureSensor = 0;
+extern int mxSelect;
 
 
 void thermometerTask(void* parameters) {

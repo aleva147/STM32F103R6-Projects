@@ -10,6 +10,7 @@ extern SemaphoreHandle_t mx_MutexHandle;
 TaskHandle_t windvane_TaskHandle;
 
 int windvaneSensor = 0;
+extern int mxSelect;
 
 
 void windvaneTask(void* parameters) {
