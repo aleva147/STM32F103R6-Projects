@@ -72,15 +72,26 @@ void LCD_Init()
 
 void LCD_CommandEnqueue(LCD_CommandReg reg, LCD_CommandVal val)
 {
-	LCD_Command cmd =
-	{ reg, val };
+	LCD_Command cmd = { reg, val };
 	xQueueSend(LCD_QueueHandle, &cmd, portMAX_DELAY);
 }
 
 void LCD_CommandEnqueueFromISR(LCD_CommandReg reg, LCD_CommandVal val,
 		BaseType_t *pxHigherPriorityTaskWoken)
 {
-	LCD_Command cmd =
-	{ reg, val };
+	LCD_Command cmd = { reg, val };
 	xQueueSendFromISR(LCD_QueueHandle, &cmd, pxHigherPriorityTaskWoken);
+}
+
+void LCD_WriteString(uint32_t addr, const char* str) {
+	LCD_CommandEnqueue(LCD_INSTRUCTION, LCD_SET_DD_RAM_ADDRESS_INSTRUCTION | addr);
+	for (size_t i = 0; i < strlen(str); i++) {
+		LCD_CommandEnqueue(LCD_DATA, str[i]);
+	}
+}
+
+void LCD_WriteInt(uint32_t addr, int num) {
+	char* str;
+	sprintf(str, "%d", num);
+	LCD_WriteString(addr, str);
 }

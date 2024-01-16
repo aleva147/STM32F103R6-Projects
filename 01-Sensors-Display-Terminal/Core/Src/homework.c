@@ -24,18 +24,6 @@ int prevAnemometer = 0;
 TimerHandle_t LED_Handle;
 
 
-void writeToLCD(uint32_t addr, const char* str) {
-	LCD_CommandEnqueue(LCD_INSTRUCTION, LCD_SET_DD_RAM_ADDRESS_INSTRUCTION | addr);
-	for (size_t i = 0; i < strlen(str); i++) {
-		LCD_CommandEnqueue(LCD_DATA, str[i]);
-	}
-}
-
-void writeToUART(char* str) {
-	for (size_t i = 0; i < strlen(str); i++) {
-		UART_AsyncTransmitCharacter(str[i]);
-	}
-}
 
 void LED_Callback() {
 	if (anemometerSensor < 50) {
@@ -49,9 +37,9 @@ void LED_Callback() {
 
 static void homeworkTask(void *parameters)
 {
-	writeToLCD(0x00, "WindDir: ");
-	writeToLCD(0x40, "WindSpd: ");
-	writeToLCD(0x10, "Temp(C): ");
+	LCD_WriteString(0x00, "WindDir: ");
+	LCD_WriteString(0x40, "WindSpd: ");
+	LCD_WriteString(0x10, "Temp(C): ");
 	while(1) {
 		if (temperatureSensor != prevTemperature
 				|| windvaneSensor != prevWindvane
@@ -60,25 +48,19 @@ static void homeworkTask(void *parameters)
 			prevWindvane = windvaneSensor;
 			prevAnemometer = anemometerSensor;
 
-			char temperature[4];
-			char windvane[4];
-			char anemometer[4];
-			sprintf(temperature, "%d", temperatureSensor);
-			sprintf(windvane, "%d", windvaneSensor);
-			sprintf(anemometer, "%d", anemometerSensor);
-			writeToLCD(0x19, "      ");	// Erase old value (necessary when decreasing the temperature from double digits to a single digit)
-			writeToLCD(0x19, temperature);
-			writeToLCD(0x09, "      ");
-			writeToLCD(0x09, windvane);
-			writeToLCD(0x49, "      ");
-			writeToLCD(0x49, anemometer);
+			LCD_WriteString(0x19, "      ");	// Erase old value (necessary when decreasing the temperature from double digits to a single digit)
+			LCD_WriteInt(0x19, temperatureSensor);
+			LCD_WriteString(0x09, "      ");
+			LCD_WriteInt(0x09, windvaneSensor);
+			LCD_WriteString(0x49, "      ");
+			LCD_WriteInt(0x49, anemometerSensor);
 
-			writeToUART("\b\b\b\b\b\b\b\b\b\b\b");
-			writeToUART(windvane);
-			writeToUART("/");
-			writeToUART(anemometer);
-			writeToUART("/");
-			writeToUART(temperature);
+			UART_TransmitString("\b\b\b\b\b\b\b\b\b\b\b");
+			UART_TransmitInt(windvaneSensor);
+			UART_TransmitCharacter('/');
+			UART_TransmitInt(anemometerSensor);
+			UART_TransmitCharacter('/');
+			UART_TransmitInt(temperatureSensor);
 		}
 
 		vTaskDelay(pdMS_TO_TICKS(200));

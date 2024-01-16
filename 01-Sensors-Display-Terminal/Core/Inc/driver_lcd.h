@@ -60,4 +60,9 @@ extern void LCD_CommandEnqueue(LCD_CommandReg reg, LCD_CommandVal val);
 extern void LCD_CommandEnqueueFromISR(LCD_CommandReg reg, LCD_CommandVal val,
 		BaseType_t *pxHigherPriorityTaskWoken);
 
+extern void LCD_WriteString(uint32_t addr, const char* str);
+
+extern void LCD_WriteInt(uint32_t addr, int num);
+
+
 #endif /* CORE_INC_DRIVER_LCD_H_ */

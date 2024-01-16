@@ -5,12 +5,10 @@
 
 extern void UART_Init();
 
-extern void UART_AsyncTransmitCharacter(char character);
-extern void UART_AsyncTransmitString(char const *string);
-extern void UART_AsyncTransmitDecimal(uint32_t decimal);
+extern void UART_TransmitCharacter(char character);
 
-extern char UART_BlockReceiveCharacter();
-extern char* UART_BlockReceiveString();
-extern uint32_t UART_BlockReceiveDecimal();
+extern void UART_TransmitString(char* str);
+
+extern void UART_TransmitInt(int num);
 
 #endif /* CORE_INC_DRIVER_UART_H_ */

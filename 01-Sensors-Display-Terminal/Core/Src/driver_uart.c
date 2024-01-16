@@ -41,8 +41,20 @@ void UART_Init()
 // TRANSMIT UTIL
 // -----------------------------------------------------------------------------
 
-void UART_AsyncTransmitCharacter(char character)
+void UART_TransmitCharacter(char character)
 {
 	uint8_t byte = character;
 	xQueueSendToBack(UART_TransmitQueueHandle, &byte, portMAX_DELAY);
+}
+
+void UART_TransmitString(char* str) {
+	for (size_t i = 0; i < strlen(str); i++) {
+		UART_TransmitCharacter(str[i]);
+	}
+}
+
+void UART_TransmitInt(int num) {
+	char* str;
+	sprintf(str, "%d", num);
+	UART_TransmitString(str);
 }
